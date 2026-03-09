@@ -57,7 +57,17 @@ Both migrations use plain `integer` for foreign keys without `unsigned()` or `->
 ```
 While Blade's `{{ }}` syntax auto-escapes, the body field uses `string` type in the migration, which limits content length. More importantly, if any view uses `{!! !!}` in the future, it would be vulnerable.
 
-### 2.7 LOW: No HTTPS Enforcement
+### 2.7 CRITICAL: Hardcoded Database Credentials
+**File:** `config/database.php:46-50`
+```php
+'host'     => env('DB_HOST','196.168.1.2'),
+'database' => env('DB_DATABASE','blog'),
+'username' => env('DB_USERNAME','anas'),
+'password' => env('DB_PASSWORD','anas'),
+```
+Hardcoded fallback credentials (username/password: `anas/anas`) are committed to version control. If `.env` is missing, these credentials are used directly. Default values in `env()` calls should be generic placeholders, not real credentials.
+
+### 2.8 LOW: No HTTPS Enforcement
 No middleware or configuration to force HTTPS connections.
 
 ---
@@ -178,7 +188,7 @@ The `body` column for both posts and comments uses `string` (VARCHAR 255). Blog 
 
 | Severity | Count | Category |
 |----------|-------|----------|
-| Critical | 1 | Plain-text passwords |
+| Critical | 2 | Plain-text passwords, hardcoded DB credentials |
 | High | 3 | Mass assignment, missing auth, no foreign keys |
 | Medium | 2 | XSS risk, no HTTPS |
 | Bug | 8 | Typos, case sensitivity, routing conflicts, empty views |
